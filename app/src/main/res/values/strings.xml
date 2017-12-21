@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Google Maps Samples</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="strNormal">Normal</string>
+    <string name="strNone">None</string>
+    <string name="strSatellite">Satellite</string>
+    <string name="strTerrain">Terrain</string>
+    <string name="strHybrid">Hybrid</string>
 </resources>
