@@ -107,6 +107,7 @@ public class DynamicLocationMapActivity extends AppCompatActivity implements OnM
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        //This will add a gps button on the map and to get to user location you have go manually
         mGoogleMap.setMyLocationEnabled(true);
 
     }
