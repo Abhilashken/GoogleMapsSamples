@@ -1,9 +1,11 @@
 package com.flaierovation_studios.googlemapssamples;
 
 import android.app.Dialog;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +36,7 @@ public class DynamicLocationMapActivity extends AppCompatActivity implements OnM
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (googleServiceAvailabilityCheck()){
+        if (googleServiceAvailabilityCheck()) {
             Toast.makeText(this, "Perfect !!", Toast.LENGTH_SHORT).show();
             setContentView(R.layout.activities_dynamic_location);
 
@@ -45,55 +47,67 @@ public class DynamicLocationMapActivity extends AppCompatActivity implements OnM
 
 
     private void initMap() {
-        MapFragment mapFragment= (MapFragment) getFragmentManager().findFragmentById(R.id.mapFragmentDynamic);
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapFragmentDynamic);
         mapFragment.getMapAsync(this);
     }
 
-    private  boolean googleServiceAvailabilityCheck(){
-        GoogleApiAvailability mGoogleApiAvailability= GoogleApiAvailability.getInstance();
-        int isAvailable= mGoogleApiAvailability.isGooglePlayServicesAvailable(this);
+    private boolean googleServiceAvailabilityCheck() {
+        GoogleApiAvailability mGoogleApiAvailability = GoogleApiAvailability.getInstance();
+        int isAvailable = mGoogleApiAvailability.isGooglePlayServicesAvailable(this);
 
         //check if Connection successful
-        if (isAvailable== ConnectionResult.SUCCESS){
+        if (isAvailable == ConnectionResult.SUCCESS) {
             return true;
-        }else if (mGoogleApiAvailability.isUserResolvableError(isAvailable)){
-            Dialog mDialog= mGoogleApiAvailability.getErrorDialog(this,isAvailable,0);
+        } else if (mGoogleApiAvailability.isUserResolvableError(isAvailable)) {
+            Dialog mDialog = mGoogleApiAvailability.getErrorDialog(this, isAvailable, 0);
             mDialog.show();
-        }else {
+        } else {
             Toast.makeText(this, "Can't connect to Play Service", Toast.LENGTH_LONG).show();
         }
         return false;
     }
 
 
-    public void geoLocate(View view) throws IOException{
-        EditText eTLocation=  findViewById(R.id.editText);
-        String strLocation= eTLocation.getText().toString();
-        
+    public void geoLocate(View view) throws IOException {
+        EditText eTLocation = findViewById(R.id.editText);
+        String strLocation = eTLocation.getText().toString();
+
         //Using Geocoder class to convert any string(entered location) to 
         //to its recognised latitude and longitude
-        Geocoder mGeocoder= new Geocoder(this);
-        List<Address> addressList= mGeocoder.getFromLocationName(strLocation,1);
-        Address address= addressList.get(0);
-        String strLocality= address.getLocality();
-        Toast.makeText(this, ""+strLocality, Toast.LENGTH_LONG).show();
-        double lat=address.getLatitude();
-        double lng=address.getLongitude();
-        
-        goToLocationZoom(lat,lng,15);
-        
+        Geocoder mGeocoder = new Geocoder(this);
+        List<Address> addressList = mGeocoder.getFromLocationName(strLocation, 1);
+        Address address = addressList.get(0);
+        String strLocality = address.getLocality();
+        Toast.makeText(this, "" + strLocality, Toast.LENGTH_LONG).show();
+        double lat = address.getLatitude();
+        double lng = address.getLongitude();
+
+        goToLocationZoom(lat, lng, 15);
+
     }
 
     private void goToLocationZoom(double lat, double lng, float zoom) {
-        LatLng mLatLng= new LatLng(lat,lng);
-        CameraUpdate mCameraUpdate= CameraUpdateFactory.newLatLngZoom(mLatLng,zoom);
+        LatLng mLatLng = new LatLng(lat, lng);
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newLatLngZoom(mLatLng, zoom);
         mGoogleMap.animateCamera(mCameraUpdate);
     }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap=googleMap;
+        mGoogleMap = googleMap;
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mGoogleMap.setMyLocationEnabled(true);
 
     }
 
