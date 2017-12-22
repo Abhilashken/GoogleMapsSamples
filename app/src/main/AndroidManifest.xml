@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".DynamicLocationMapActivity"></activity>
-
+        <activity android:name=".UserCurr_Loc_GoogleAPIClnt"></activity>
         <activity android:name=".MarkerEventMap"></activity>
 
         <meta-data
