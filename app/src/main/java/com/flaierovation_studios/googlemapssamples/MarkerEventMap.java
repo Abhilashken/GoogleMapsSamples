@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -71,13 +72,13 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu,menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.mapTypeNone:
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NONE);
                 break;
@@ -134,6 +135,7 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
         }
         MarkerOptions markerOptions = new MarkerOptions()
                 .title(strLocation)
+                .draggable(true)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
                 .position(new LatLng(lat, lng))
                 .snippet(strLocation + "," + strLocality);
@@ -147,9 +149,72 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
     }
 
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+
+        if (mGoogleMap!=null){
+            mGoogleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {
+
+                }
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    Geocoder mGeocoder= new Geocoder(MarkerEventMap.this);
+                    LatLng mLatLng= marker.getPosition();
+                    List<Address> addressList2 = null;
+
+                    try {
+                        addressList2= mGeocoder.getFromLocation(mLatLng.latitude,mLatLng.longitude,1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Address address=addressList2.get(0);
+                    marker.setTitle(address.getSubLocality()+","+address.getLocality());
+                    marker.showInfoWindow();
+
+                }
+            });
+        }
+
+
+
+        // process for info window with marker as follows
+        if (mGoogleMap != null) {
+
+            mGoogleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                @Override
+                public View getInfoWindow(Marker marker) {
+                    return null;
+                }
+
+                @Override
+                public View getInfoContents(Marker marker) {
+                    View view = getLayoutInflater().inflate(R.layout.show_info_window, null);
+                    TextView tv_locality = view.findViewById(R.id.tv_locality);
+                    TextView tv_lat = view.findViewById(R.id.tv_latitude);
+                    TextView tv_lng = view.findViewById(R.id.tv_longitude);
+                    TextView tv_snippet = view.findViewById(R.id.tv_snippet);
+
+                    LatLng mLatLng = marker.getPosition();
+
+                    tv_locality.setText(marker.getTitle());
+                    tv_lat.setText("Latitude: " + mLatLng.latitude);
+                    tv_lng.setText("Longitude: " + mLatLng.longitude);
+                    tv_snippet.setText(marker.getSnippet());
+
+
+                    return view;
+                }
+            });
+        }
     }
 }

@@ -37,6 +37,8 @@
         </activity>
         <activity android:name=".DynamicLocationMapActivity"></activity>
 
+        <activity android:name=".MarkerEventMap"></activity>
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCvIdtCR9hOx9dZTFI1aCg_bt9s1k5bzTE" />
