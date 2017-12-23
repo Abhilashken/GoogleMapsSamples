@@ -1,16 +1,15 @@
 package com.flaierovation_studios.googlemapssamples;
 
 import android.app.Dialog;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -21,6 +20,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -32,10 +33,9 @@ import java.util.List;
  * Created by Abhilash on 23-Dec-16.
  */
 
-
-public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallback {
-
+public class MapOverlaysDrawCircleMarker extends AppCompatActivity implements OnMapReadyCallback {
     GoogleMap mGoogleMap;
+    Circle mCircle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,6 +105,7 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
         return super.onOptionsItemSelected(item);
     }
 
+
     Marker marker;
 
     public void geoLocate(View view) throws IOException {
@@ -127,19 +128,7 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
 
         //calling Marker method
         setMarker(strLocation, strLocality, lat, lng);
-    }
 
-    private void setMarker(String strLocation, String strLocality, double lat, double lng) {
-        if (marker != null) {
-            marker.remove();
-        }
-        MarkerOptions markerOptions = new MarkerOptions()
-                .title(strLocation)
-                .draggable(true)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
-                .position(new LatLng(lat, lng))
-                .snippet(strLocation + "," + strLocality);
-        mGoogleMap.addMarker(markerOptions);
     }
 
     private void goToLocationZoom(double lat, double lng, float zoom) {
@@ -148,12 +137,46 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
         mGoogleMap.animateCamera(mCameraUpdate);
     }
 
+    //Marker definition method with drawCircle called inside
+    private void setMarker(String strLocation, String strLocality, double lat, double lng) {
+        if (marker != null) {
+            removeEverything();
+        }
+        MarkerOptions markerOptions = new MarkerOptions()
+                .title(strLocation)
+                .draggable(true)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                .position(new LatLng(lat, lng))
+                .snippet(strLocation + "," + strLocality);
+        mGoogleMap.addMarker(markerOptions);
+        mCircle = drawCircle(new LatLng(lat, lng));
+
+    }
+
+    //method to remove everything previous i.e. marker and circle
+    private void removeEverything() {
+        marker.remove();
+        marker = null;
+        mCircle.remove();
+        mCircle = null;
+    }
+
+    private Circle drawCircle(LatLng latLng) {
+        CircleOptions mCircleOptions = new CircleOptions()
+                .center(latLng)
+                .radius(1000)
+                .fillColor(0x33FF0000)
+                .strokeColor(Color.BLUE)
+                .strokeWidth(3);
+        return mGoogleMap.addCircle(mCircleOptions);
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+        if (mGoogleMap != null) {
 
-        if (mGoogleMap!=null){
             mGoogleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
                 @Override
                 public void onMarkerDragStart(Marker marker) {
@@ -167,54 +190,24 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
-                    Geocoder mGeocoder= new Geocoder(getApplicationContext());
-                    LatLng mLatLng= marker.getPosition();
-                    List<Address> addressList2 = null;
+                    Geocoder mGeocoder = new Geocoder(getApplicationContext());
 
+                    LatLng mLatLng = marker.getPosition();
+                    List<Address> addressList2 = null;
                     try {
-                        addressList2= mGeocoder.getFromLocation(mLatLng.latitude,mLatLng.longitude,1);
+                        addressList2 = mGeocoder.getFromLocation(mLatLng.latitude, mLatLng.longitude, 1);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    Address address=addressList2.get(0);
-                    marker.setTitle(address.getSubLocality()+", "+address.getLocality());
+                    Address address = addressList2.get(0);
+                    marker.setTitle(address.getSubLocality() + ", " + address.getLocality());
                     marker.showInfoWindow();
 
+
                 }
             });
-        }
 
-
-
-        // process for info window with marker as follows
-        if (mGoogleMap != null) {
-
-            mGoogleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-                @Override
-                public View getInfoWindow(Marker marker) {
-                    return null;
-                }
-
-                @Override
-                public View getInfoContents(Marker marker) {
-                    View view = getLayoutInflater().inflate(R.layout.show_info_window, null);
-                    TextView tv_locality = view.findViewById(R.id.tv_locality);
-                    TextView tv_lat = view.findViewById(R.id.tv_latitude);
-                    TextView tv_lng = view.findViewById(R.id.tv_longitude);
-                    TextView tv_snippet = view.findViewById(R.id.tv_snippet);
-
-                    LatLng mLatLng = marker.getPosition();
-
-                    tv_locality.setText(marker.getTitle());
-                    tv_lat.setText("Latitude: " + mLatLng.latitude);
-                    tv_lng.setText("Longitude: " + mLatLng.longitude);
-                    tv_snippet.setText(marker.getSnippet());
-
-
-                    return view;
-                }
-            });
         }
     }
 }
