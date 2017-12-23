@@ -167,7 +167,7 @@ public class MarkerEventMap extends AppCompatActivity implements OnMapReadyCallb
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
-                    Geocoder mGeocoder= new Geocoder(MarkerEventMap.this);
+                    Geocoder mGeocoder= new Geocoder(getApplicationContext());
                     LatLng mLatLng= marker.getPosition();
                     List<Address> addressList2 = null;
 
